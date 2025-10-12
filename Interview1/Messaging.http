@@ -1,0 +1,57 @@
+### Send a single message to Service Bus
+POST {{Interview1_HostAddress}}/api/messaging/send
+Content-Type: application/json
+
+{
+  "orderId": "ORD-001",
+  "customerName": "John Doe",
+  "amount": 99.99,
+  "orderDate": "2025-10-11T10:00:00Z",
+  "status": "Pending"
+}
+
+###
+
+### Send multiple messages in batch
+POST {{Interview1_HostAddress}}/api/messaging/send-batch
+Content-Type: application/json
+
+[
+  {
+    "orderId": "ORD-002",
+    "customerName": "Jane Smith",
+    "amount": 149.99,
+    "orderDate": "2025-10-11T10:01:00Z",
+    "status": "Pending"
+  },
+  {
+    "orderId": "ORD-003",
+    "customerName": "Bob Johnson",
+    "amount": 79.99,
+    "orderDate": "2025-10-11T10:02:00Z",
+    "status": "Processing"
+  },
+  {
+    "orderId": "ORD-004",
+    "customerName": "Alice Williams",
+    "amount": 199.99,
+    "orderDate": "2025-10-11T10:03:00Z",
+    "status": "Completed"
+  }
+]
+
+###
+
+### Test with larger amount
+POST {{Interview1_HostAddress}}/api/messaging/send
+Content-Type: application/json
+
+{
+  "orderId": "ORD-005",
+  "customerName": "Michael Brown",
+  "amount": 1299.99,
+  "orderDate": "2025-10-11T10:05:00Z",
+  "status": "Pending"
+}
+
+###

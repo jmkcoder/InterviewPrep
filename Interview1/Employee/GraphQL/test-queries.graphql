@@ -1,0 +1,75 @@
+# Test Queries for Employee GraphQL API
+# Use these queries in Banana Cake Pop or any GraphQL client
+
+# Query 1: Get all employees with all fields
+query GetAllEmployees {
+  employees {
+    employeeNo
+    name
+    job
+    manager
+    hireDate
+    salary
+    commission
+    departmentNo
+  }
+}
+
+# Query 2: Get all employees with only essential fields
+query GetEmployeesBasic {
+  employees {
+    employeeNo
+    name
+    job
+    salary
+  }
+}
+
+# Query 3: Get employee by ID
+query GetEmployeeById {
+  employeeById(employeeNo: 7369) {
+    employeeNo
+    name
+    job
+    manager
+    hireDate
+    salary
+    commission
+    departmentNo
+  }
+}
+
+# Query 4: Get employees by department
+query GetEmployeesByDepartment {
+  employeesByDepartment(departmentId: 10) {
+    employeeNo
+    name
+    job
+    salary
+    departmentNo
+  }
+}
+
+# Query 5: Get all employees without department filter
+query GetAllEmployeesStream {
+  employeesByDepartment {
+    employeeNo
+    name
+    salary
+    departmentNo
+  }
+}
+
+# Query 6: Multiple queries in one request
+query MultipleQueries {
+  allEmployees: employees {
+    name
+    salary
+  }
+  
+  specificEmployee: employeeById(employeeNo: 7369) {
+    name
+    job
+    salary
+  }
+}

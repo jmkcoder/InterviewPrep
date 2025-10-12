@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Interview1.Aspire/Interview1.Aspire.AppHost/Interview1.Aspire.AppHost.csproj" Id="f7194081-1251-4c46-8bdd-e5066f6e9c6e" />
+  <Project Path="Interview1.Aspire/Interview1.Aspire.ServiceDefaults/Interview1.Aspire.ServiceDefaults.csproj" />
+  <Project Path="Interview1.Database/Interview1.Database.csproj" />
+  <Project Path="Interview1.Worker.QueueService/Interview1.Worker.QueueService.csproj" />
+  <Project Path="Interview1/Interview1.csproj" />
+</Solution>
