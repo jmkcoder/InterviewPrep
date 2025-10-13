@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Interview1.Messaging;
@@ -36,6 +37,18 @@ public class MessagingController : ControllerBase
             // Add custom properties if needed
             serviceBusMessage.ApplicationProperties.Add("MessageType", "Order");
             serviceBusMessage.ApplicationProperties.Add("Timestamp", DateTime.UtcNow.ToString("o"));
+
+            // Propagate distributed tracing context
+            var activity = Activity.Current;
+            if (activity != null)
+            {
+                serviceBusMessage.ApplicationProperties.Add("Diagnostic-Id", activity.Id);
+                serviceBusMessage.ApplicationProperties.Add("traceparent", activity.Id);
+                if (!string.IsNullOrEmpty(activity.TraceStateString))
+                {
+                    serviceBusMessage.ApplicationProperties.Add("tracestate", activity.TraceStateString);
+                }
+            }
 
             serviceBusMessage.Subject = message.Subject;
 
@@ -78,6 +91,18 @@ public class MessagingController : ControllerBase
                 };
 
                 serviceBusMessage.Subject = message.Subject;
+
+                // Propagate distributed tracing context
+                var activity = Activity.Current;
+                if (activity != null)
+                {
+                    serviceBusMessage.ApplicationProperties.Add("Diagnostic-Id", activity.Id);
+                    serviceBusMessage.ApplicationProperties.Add("traceparent", activity.Id);
+                    if (!string.IsNullOrEmpty(activity.TraceStateString))
+                    {
+                        serviceBusMessage.ApplicationProperties.Add("tracestate", activity.TraceStateString);
+                    }
+                }
 
                 // Try to add the message to the batch
                 if (!messageBatch.TryAddMessage(serviceBusMessage))

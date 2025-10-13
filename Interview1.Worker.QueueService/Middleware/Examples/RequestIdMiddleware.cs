@@ -83,7 +83,9 @@ namespace Interview1.Worker.QueueService.Middleware.Examples
     }
 
     /// <summary>
-    /// Middleware that adds distributed tracing support.
+    /// Middleware that adds distributed tracing support with parent context propagation.
+    /// Extracts trace context from Service Bus message properties to maintain correlation
+    /// across service boundaries.
     /// </summary>
     public class DistributedTracingMiddleware : ITaskMiddleware
     {
@@ -97,18 +99,66 @@ namespace Interview1.Worker.QueueService.Middleware.Examples
 
         public async Task InvokeAsync(TaskContext context, TaskDelegate next)
         {
-            using var activity = ActivitySource.StartActivity(
-                $"ProcessMessage: {context.Message.Subject}",
-                ActivityKind.Consumer);
+            // Extract trace context from message properties
+            string? traceParent = null;
+            string? traceState = null;
+
+            if (context.Message.ApplicationProperties.TryGetValue("traceparent", out var traceParentObj))
+            {
+                traceParent = traceParentObj?.ToString();
+            }
+            else if (context.Message.ApplicationProperties.TryGetValue("Diagnostic-Id", out var diagnosticIdObj))
+            {
+                traceParent = diagnosticIdObj?.ToString();
+            }
+
+            if (context.Message.ApplicationProperties.TryGetValue("tracestate", out var traceStateObj))
+            {
+                traceState = traceStateObj?.ToString();
+            }
+
+            Activity? activity = null;
+
+            // If trace parent exists, create activity linked to parent
+            if (!string.IsNullOrEmpty(traceParent) && ActivityContext.TryParse(traceParent, traceState, out var parentContext))
+            {
+                activity = ActivitySource.StartActivity(
+                    $"ProcessMessage: {context.Message.Subject}",
+                    ActivityKind.Consumer,
+                    parentContext);
+
+                if (activity != null)
+                {
+                    _logger.LogDebug(
+                        "Created activity {ActivityId} linked to parent {ParentId}",
+                        activity.Id,
+                        traceParent);
+                }
+            }
+            else
+            {
+                // No parent context, create new root activity
+                activity = ActivitySource.StartActivity(
+                    $"ProcessMessage: {context.Message.Subject}",
+                    ActivityKind.Consumer);
+
+                if (activity != null)
+                {
+                    _logger.LogDebug("Created new root activity {ActivityId}", activity.Id);
+                }
+            }
 
             if (activity != null)
             {
+                // Add semantic tags following OpenTelemetry conventions
                 activity.SetTag("messaging.system", "azureservicebus");
                 activity.SetTag("messaging.destination", "orders");
+                activity.SetTag("messaging.operation", "process");
                 activity.SetTag("messaging.message_id", context.Message.MessageId);
                 activity.SetTag("messaging.correlation_id", context.Message.CorrelationId);
                 activity.SetTag("messaging.delivery_count", context.Message.DeliveryCount);
                 activity.SetTag("request.id", context.RequestId);
+                activity.SetTag("message.subject", context.Message.Subject);
 
                 context.Items["Activity"] = activity;
             }
@@ -133,6 +183,10 @@ namespace Interview1.Worker.QueueService.Middleware.Examples
                     activity.SetStatus(ActivityStatusCode.Error, ex.Message);
                 }
                 throw;
+            }
+            finally
+            {
+                activity?.Dispose();
             }
         }
     }

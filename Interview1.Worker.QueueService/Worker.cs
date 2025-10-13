@@ -31,12 +31,12 @@ public class Worker : ServiceBusWorkerBase
     {
         // Default middleware configuration
         // Order matters! Middleware execute in the order added.
-        return builder;
-            //.UseExceptionHandler()        // 1. Catch all exceptions (outermost)
-            //.UseRequestId()                // 2. Assign request ID
-            //.UseLogging()                  // 3. Log request/response
-            //.UseTiming()                   // 4. Measure execution time
-            //.UseDistributedTracing()       // 5. Add distributed tracing
+        return builder
+            .UseExceptionHandler()        // 1. Catch all exceptions (outermost)
+            .UseRequestId()                // 2. Assign request ID
+            .UseDistributedTracing()       // 3. Add distributed tracing with parent context propagation
+            .UseLogging()                  // 4. Log request/response
+            .UseTiming();                  // 5. Measure execution time
             //.UseSubjectValidation()        // 6. Validate message subject
             //.UseMessageExpiration();       // 7. Check message expiration
             
