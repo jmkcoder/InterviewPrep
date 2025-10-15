@@ -6,6 +6,10 @@ A complete middleware pipeline for Service Bus message processing that mirrors A
 
 Middleware provides a mechanism for inspecting, modifying, or short-circuiting message processing before it reaches your tasks and filters. Think of middleware as the outermost layer that wraps your entire message processing pipeline.
 
+This middleware system is **inspired by ASP.NET Core middleware** but uses **custom interfaces** designed specifically for Service Bus message processing. The patterns and concepts are the same, but adapted for message handling instead of HTTP requests.
+
+> **Note:** These are **custom interfaces** (`ITaskMiddleware`, `TaskContext`, `TaskDelegate`), not the actual ASP.NET Core middleware interfaces. However, they follow the same design patterns for familiarity.
+
 ```
 Message → Middleware Pipeline → Filter Pipeline → Task Execution → Result
 ```

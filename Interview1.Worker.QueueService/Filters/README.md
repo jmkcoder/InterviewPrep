@@ -4,7 +4,9 @@ A complete filter pipeline for Service Bus message processing that mirrors ASP.N
 
 ## Overview
 
-This filter system provides the same powerful, well-understood filter pipeline as ASP.NET Core MVC, adapted for Azure Service Bus message processing. Filters allow you to run code before and after specific stages of task execution, handle exceptions, and short-circuit the pipeline when needed.
+This filter system provides a powerful filter pipeline **inspired by ASP.NET Core MVC**, adapted for Azure Service Bus message processing. While the interfaces are custom-built for Service Bus scenarios, they follow the same patterns and concepts as ASP.NET Core filters. This system allows you to run code before and after specific stages of task execution, handle exceptions, and short-circuit the pipeline when needed.
+
+> **Note:** These are **custom interfaces** designed for Service Bus message processing, not the actual ASP.NET Core MVC filter interfaces. However, they follow the same design patterns and execution order for familiarity.
 
 ## Filter Types
 
@@ -421,15 +423,24 @@ public async Task RequireClaimAttribute_MissingClaim_ShortCircuits()
 
 ## Comparison to ASP.NET Core MVC
 
-| MVC Filter | Task Filter | Same Behavior? |
-|------------|-------------|----------------|
-| `IAuthorizationFilter` | `IAuthorizationFilter` | ✅ Yes |
-| `IResourceFilter` | `IResourceFilter` | ✅ Yes |
-| `IActionFilter` | `IActionFilter` | ✅ Yes |
-| `IResultFilter` | `IResultFilter` | ✅ Yes |
-| `IExceptionFilter` | `IExceptionFilter` | ✅ Yes |
-| `Order` property | `Order` property | ✅ Yes |
-| Short-circuiting | Short-circuiting | ✅ Yes |
-| `HttpContext.Items` | `FilterContext.Items` | ✅ Yes |
+| Concept | ASP.NET Core MVC | This Project | Notes |
+|---------|------------------|--------------|-------|
+| **Interfaces** | `IAuthorizationFilter`, etc. | `IAuthorizationFilter`, etc. | ❌ **Different interfaces** (same names, different signatures) |
+| **Execution Order** | Auth → Resource → Action → Result → Exception | Auth → Resource → Action → Result → Exception | ✅ **Same order** |
+| **Short-circuiting** | Set `context.Result` | Set `context.Result` | ✅ **Same pattern** |
+| **Order property** | `Order` | `Order` | ✅ **Same behavior** |
+| **Context sharing** | `HttpContext.Items` | `FilterContext.Items` | ✅ **Same pattern** |
+| **Async support** | `OnActionExecuting` (sync) | `OnActionExecutingAsync` (async) | ⚠️ **All async** in this project |
+| **Context objects** | `HttpContext`, `ActionExecutingContext` | `TaskContext`, `ActionExecutingContext` (custom) | ❌ **Different contexts** |
+| **Domain** | HTTP requests | Service Bus messages | ❌ **Different domain** |
 
-The filter pipeline has been implemented to match ASP.NET Core MVC behavior as closely as possible, making it familiar to .NET developers.
+### Key Takeaway
+
+This project **follows ASP.NET Core MVC's design patterns** but uses **custom interfaces** adapted for Service Bus message processing. The behavior, execution order, and concepts are the same, making it familiar to ASP.NET Core developers, but you cannot directly use ASP.NET Core filter attributes or interfaces.
+
+**Benefits of Custom Interfaces:**
+- ✅ Async-first design (no sync methods)
+- ✅ Service Bus-specific context objects
+- ✅ Tailored for message processing scenarios
+- ✅ No HTTP dependencies
+- ✅ Simplified API focused on message handling

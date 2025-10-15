@@ -11,7 +11,9 @@ This is a **background worker service** that:
 - Includes filters for task-specific logic (authorization, validation, result handling)
 - Handles errors gracefully with automatic retries and dead-lettering
 
-Think of it as **ASP.NET Core MVC for message processing** - with middleware, filters, and a request pipeline!
+Think of it as **ASP.NET Core MVC patterns adapted for message processing** - with familiar middleware and filter concepts applied to Service Bus!
+
+> **Note:** This project uses **custom interfaces inspired by ASP.NET Core**, not the actual ASP.NET Core interfaces. The patterns and concepts are the same, but adapted for Service Bus message processing instead of HTTP requests.
 
 ## 📋 Table of Contents
 
